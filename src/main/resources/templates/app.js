@@ -22,12 +22,12 @@ $(document).ready(function () {
 
 // 모달 열기 함수
 function openModal() {
-    $('#signup-modal').show();
+    $('#signup-modal').modal('show');
 }
 
 // 모달 닫기 함수
 function closeModal() {
-    $('#signup-modal').hide();
+    $('#signup-modal').modal('hide');
 }
 
 function showCalendar() {
@@ -38,9 +38,12 @@ function showCalendar() {
     loadUserEvents(username);
 }
 
+
+//로그인 함수
+let isLogin = false;
 window.login = function () {
-    var username = $('#username').val();
-    var password = $('#password').val();
+    let username = $('#username').val();
+    let password = $('#password').val();
 
     $.ajax({
         url: '/api/auth/login',
@@ -50,6 +53,7 @@ window.login = function () {
         success: function (response) {
             // 로그인 성공 시 캘린더 표시 및 환영 메시지 표시
             showCalendar(username);
+            isLogin = true;
         },
         error: function (error) {
             console.error('Login failed:', error);
@@ -78,9 +82,9 @@ function loadUserEvents(username) {
 }
 
 // calendar element 취득
-var calendarEl = $('#calendar')[0];
+let calendarEl = $('#calendar')[0];
 // full-calendar 생성하기
-var calendar = new FullCalendar.Calendar(calendarEl, {
+let calendar = new FullCalendar.Calendar(calendarEl, {
     height: '700px', // calendar 높이 설정
     expandRows: true, // 화면에 맞게 높이 재설정
     slotMinTime: '08:00', // Day 캘린더에서 시작 시간
@@ -93,9 +97,9 @@ var calendar = new FullCalendar.Calendar(calendarEl, {
     },
     initialView: 'dayGridMonth', // 초기 로드 될때 보이는 캘린더 화면(기본 설정: 달)
     initialDate: undefined,
-    navLinks: true, // 날짜를 선택하면 Day 캘린더나 Week 캘린더로 링크
-    editable: true, // 수정 가능?
-    selectable: true, // 달력 일자 드래그 설정가능
+    navLinks: isLogin, // 날짜를 선택하면 Day 캘린더나 Week 캘린더로 링크
+    editable: isLogin, // 수정 가능?
+    selectable: isLogin, // 달력 일자 드래그 설정가능
     nowIndicator: true, // 현재 시간 마크
     dayMaxEvents: true, // 이벤트가 오버되면 높이 제한 (+ 몇 개식으로 표현)
     locale: 'ko', // 한국어 설정
@@ -110,32 +114,34 @@ var calendar = new FullCalendar.Calendar(calendarEl, {
     },
 
     select: function (arg) { // 캘린더에서 드래그로 이벤트를 생성할 수 있다.
-        var title = prompt('Event Title:');
-        if (title) {
-            var newEvent = {
-                title: title,
-                start: arg.start,
-                end: arg.end,
-                allDay: arg.allDay
+        if(!isLogin) {
+            let title = prompt('Event Title:');
+            if (title) {
+                let newEvent = {
+                    title: title,
+                    start: arg.start,
+                    end: arg.end,
+                    allDay: arg.allDay
 
-            };
+                };
 
-            $.ajax({
-                url: '/api/createEvent',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(newEvent),
-                success: function (response) {
-                    console.log('Event created successfully:', response);
-                    // 서버로부터 응답을 받은 후, 캘린더에 이벤트 추가
-                    calendar.addEvent(newEvent);
-                },
-                error: function (error) {
-                    console.error('Error creating event:', error);
-                }
-            });
+                $.ajax({
+                    url: '/api/createEvent',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(newEvent),
+                    success: function (response) {
+                        console.log('Event created successfully:', response);
+                        // 서버로부터 응답을 받은 후, 캘린더에 이벤트 추가
+                        calendar.addEvent(newEvent);
+                    },
+                    error: function (error) {
+                        console.error('Error creating event:', error);
+                    }
+                });
+            }
+            calendar.unselect();
         }
-        calendar.unselect();
     },
     // 이벤트
     events: [

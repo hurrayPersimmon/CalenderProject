@@ -118,25 +118,37 @@
 </nav>
 
 <!-- 모달 -->
-<div id="signup-modal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal()">&times;</span>
-        <h2>Signup</h2>
-        <form id="signup-form">
-            <label for="signup-username">Username:</label>
-            <input type="text" id="signup-username" name="signup-username" required>
-
-            <label for="signup-password">Password:</label>
-            <input type="password" id="signup-password" name="signup-password" required>
-
-            <button type="submit">Signup</button>
-        </form>
+<div class="modal fade" id="signup-modal" tabindex="-1" role="dialog" aria-labelledby="signupModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="signupModalLabel">Signup</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="signup-form">
+                    <div class="form-group">
+                        <label for="signup-username">Username:</label>
+                        <input type="text" class="form-control" id="signup-username" name="signup-username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-password">Password:</label>
+                        <input type="password" class="form-control" id="signup-password" name="signup-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Signup</button>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 <!-- calendar 태그 -->
 <div id='calendar-container'>
     <div id='calendar'></div>
 </div>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
