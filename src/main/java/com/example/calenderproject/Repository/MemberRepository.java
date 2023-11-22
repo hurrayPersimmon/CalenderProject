@@ -5,4 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
     MemberEntity findByUsername(String username);
+    MemberEntity deleteByusername(String username);
+    Boolean existsByUsername(String username);
+
 }

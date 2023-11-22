@@ -1,7 +1,7 @@
 package com.example.calenderproject.Dto;
 
 import com.example.calenderproject.Entity.MemberEntity;
-import lombok.Builder;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

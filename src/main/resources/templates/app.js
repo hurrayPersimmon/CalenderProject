@@ -1,85 +1,43 @@
 $(document).ready(function () {
     showLoginForm();
 
+
+    if(sessionStorage.getItem('isLogin')!=='true') {
+        console.log('로그아웃 상태');
+        showLoginForm();
+    } else {
+        console.log('로그인 상태');
+        showCalendar();
+    }
     function showLoginForm() {
         $('#login-container').show();
         $('#calendar-container').show();
-        $('#welcome-message').hide();
+        $('#log-in').show();
+        $('#log-out').hide();
+        $('#deleteModal').modal('hide');
+        $('#delete-button').hide();
+        hideLoadingModal();
     }
 
-    window.signup = function () {
-        openModal();
-    };
+    function showCalendar() {
+        $('#login-container').hide();
+        $('#signup-button').hide();
+        $('#calendar-container').show();
+        $('#log-in').hide();
+        $('#log-out').show();
+        $('#delete-button').show();
+        $('.navbar-brand').text( sessionStorage.getItem('username') + "'s Calendar"); // 네비게이션 바의 Calendar App 부분 변경
+        loadUserEvents(sessionStorage.getItem('username'));
+    }
 
-
-    $('#signup-form').submit(function (event) {
-        event.preventDefault();
-        // TODO: 회원가입 처리 로직 추가
-        alert('Signup logic should be implemented here.');
-        closeModal();
-    });
+    // window.signup = function () {
+    //     openModal();
+    // };
 });
 
-// 모달 열기 함수
-function openModal() {
-    $('#signup-modal').modal('show');
-}
-
-// 모달 닫기 함수
-function closeModal() {
-    $('#signup-modal').modal('hide');
-}
-
-function showCalendar() {
-    $('#login-container').hide();
-    $('#calendar-container').show();
-    $('#welcome-message').text('좋은 하루입니다, ' + $('#username').val() + '님');
-
-    loadUserEvents(username);
-}
-
-
-//로그인 함수
-let isLogin = false;
-window.login = function () {
-    let username = $('#username').val();
-    let password = $('#password').val();
-
-    $.ajax({
-        url: '/api/auth/login',
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({username: username, password: password}),
-        success: function (response) {
-            // 로그인 성공 시 캘린더 표시 및 환영 메시지 표시
-            showCalendar(username);
-            isLogin = true;
-        },
-        error: function (error) {
-            console.error('Login failed:', error);
-            alert('로그인에 실패했습니다. 다시 시도하세요.');
-        }
-    });
-};
-
-function loadUserEvents(username) {
-    $.ajax({
-        url: '/api/events',
-        method: 'GET',
-        contentType: 'application/json',
-        data: {username: username},
-        success: function (response) {
-            console.log('Events found:', response);
-            // 서버로부터 응답을 받은 후, 캘린더에 이벤트 추가
-            response.forEach(function (event) {
-                calendar.addEvent(event);
-            });
-        },
-        error: function (error) {
-            console.error('Error getting events', error);
-        }
-    });
-}
+const hostName = window.location.hostname;
+console.log(hostName);
+const hostNameServerUrl = 'http://' + hostName + ':8080';
 
 // calendar element 취득
 let calendarEl = $('#calendar')[0];
@@ -96,10 +54,10 @@ let calendar = new FullCalendar.Calendar(calendarEl, {
         right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
     },
     initialView: 'dayGridMonth', // 초기 로드 될때 보이는 캘린더 화면(기본 설정: 달)
-    initialDate: undefined,
-    navLinks: isLogin, // 날짜를 선택하면 Day 캘린더나 Week 캘린더로 링크
-    editable: isLogin, // 수정 가능?
-    selectable: isLogin, // 달력 일자 드래그 설정가능
+    initialDate: undefined, // 초기 로드 될때 보이는 날짜(기본 설정: 오늘)
+    navLinks: JSON.parse(sessionStorage.getItem('isLogin')), // 날짜를 선택하면 Day 캘린더나 Week 캘린더로 링크
+    editable: false, // 수정 가능?
+    selectable: JSON.parse(sessionStorage.getItem('isLogin')), // 달력 일자 드래그 설정가능
     nowIndicator: true, // 현재 시간 마크
     dayMaxEvents: true, // 이벤트가 오버되면 높이 제한 (+ 몇 개식으로 표현)
     locale: 'ko', // 한국어 설정
@@ -114,36 +72,35 @@ let calendar = new FullCalendar.Calendar(calendarEl, {
     },
 
     select: function (arg) { // 캘린더에서 드래그로 이벤트를 생성할 수 있다.
-        if(!isLogin) {
-            let title = prompt('Event Title:');
-            if (title) {
-                let newEvent = {
-                    title: title,
-                    start: arg.start,
-                    end: arg.end,
-                    allDay: arg.allDay
+        let title = prompt('Event Title:');
+        if (title) {
+            let newEvent = {
+                title: title,
+                start: arg.start,
+                end: arg.end,
+                allDay: arg.allDay
 
-                };
+            };
 
-                $.ajax({
-                    url: '/api/createEvent',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(newEvent),
-                    success: function (response) {
-                        console.log('Event created successfully:', response);
-                        // 서버로부터 응답을 받은 후, 캘린더에 이벤트 추가
-                        calendar.addEvent(newEvent);
-                    },
-                    error: function (error) {
-                        console.error('Error creating event:', error);
-                    }
-                });
-            }
+            $.ajax({
+                url: hostNameServerUrl+'/api/createEvent',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(newEvent),
+                success: function (response) {
+                    console.log('Event created successfully:', response);
+                    // 서버로부터 응답을 받은 후, 캘린더에 이벤트 추가
+                    calendar.addEvent(newEvent);
+                },
+                error: function (error) {
+                    console.error('Error creating event:', error);
+                }
+            });
+
             calendar.unselect();
         }
     },
-    // 이벤트
+    // 하드 코딩 된 이벤트
     events: [
         {
             title: 'Minseo Birthday',
@@ -153,53 +110,114 @@ let calendar = new FullCalendar.Calendar(calendarEl, {
             title: 'Long Event',
             start: '2021-07-07',
             end: '2021-07-10'
-        },
-        {
-            groupId: 999,
-            title: 'Repeating Event',
-            start: '2021-07-09T16:00:00'
-        },
-        {
-            groupId: 999,
-            title: 'Repeating Event',
-            start: '2021-07-16T16:00:00'
-        },
-        {
-            title: 'Conference',
-            start: '2021-07-11',
-            end: '2021-07-13'
-        },
-        {
-            title: 'Meeting',
-            start: '2021-07-12T10:30:00',
-            end: '2021-07-12T12:30:00'
-        },
-        {
-            title: 'Lunch',
-            start: '2021-07-12T12:00:00'
-        },
-        {
-            title: 'Meeting',
-            start: '2021-07-12T14:30:00'
-        },
-        {
-            title: 'Happy Hour',
-            start: '2021-07-12T17:30:00'
-        },
-        {
-            title: 'Dinner',
-            start: '2021-07-12T20:00:00'
-        },
-        {
-            title: 'Birthday Party',
-            start: '2021-07-13T07:00:00'
-        },
-        {
-            title: 'Click for Google',
-            url: 'http://google.com/', // 클릭시 해당 url로 이동
-            start: '2021-07-28'
         }
     ]
 });
 // 캘린더 랜더링
 calendar.render();
+
+
+
+
+//로그인 함수
+window.login = function () {
+    showLoadingModal();
+    let username = $('#username').val();
+    let password = $('#password').val();
+    $.ajax({
+        url: hostNameServerUrl+'/api/member/login',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({username: username, password: password}),
+        success: function (data) {
+            console.log('Login successful:', data);
+            // 로그인 성공 시 캘린더 표시 및 환영 메시지 표시
+            sessionStorage.setItem('isLogin', 'true');
+            sessionStorage.setItem('username', data.username);
+            sessionStorage.setItem('id', data.id);
+            hideLoadingModal();
+            window.location.reload();
+        },
+        error: function (error) {
+            hideLoadingModal();
+            console.error('Login failed:', error);
+            alert('로그인에 실패했습니다. 다시 시도하세요.');
+        }
+    });
+};
+
+//로그아웃 함수
+window.logout = function () {
+    console.log('로그아웃');
+    sessionStorage.setItem('isLogin', 'false');
+    sessionStorage.removeItem('username');
+    window.location.reload();
+}
+
+// 회원 탈퇴 요청시 모달로 회원 탈퇴 시 기존 데이터가 다 삭제됨을 알림
+window.openModal = function () {
+    $('#deleteModal').modal({
+        backdrop: 'static',
+        keyboard: false
+    });
+};
+
+
+// 회원 탈퇴 함수
+window.deleteMember = function () {
+    let username = sessionStorage.getItem('username');
+    let password = $('#deletePassword').val();
+    let id = sessionStorage.getItem('id');
+    console.log(username, password);
+    $.ajax({
+        url: hostNameServerUrl+'/api/member/delete',
+        method: 'DELETE',
+        contentType: 'application/json',
+        data: JSON.stringify({id : id, username: username, password: password}),
+        success: function (data) {
+            console.log('Delete successful:', data);
+            // 로그인 성공 시 캘린더 표시 및 환영 메시지 표시
+            sessionStorage.setItem('isLogin', 'false');
+            sessionStorage.removeItem('username');
+            window.location.reload();
+        },
+        error: function (error) {
+            console.error('Delete failed:', error);
+            alert('회원 탈퇴에 실패했습니다. 다시 시도하세요.');
+        }
+    });
+};
+
+// 로딩 중인 경우 모달 보이기
+function showLoadingModal() {
+    $('#loadingModal').modal({
+        backdrop: 'static',
+        keyboard: false
+    });
+}
+
+// 로딩 중인 경우 모달 숨기기
+function hideLoadingModal() {
+    $('#loadingModal').removeClass('active');
+}
+
+// 서버로부터 username에 해당하는 이벤트를 가져와서 캘린더에 추가
+function loadUserEvents(username) {
+    $.ajax({
+        url: hostNameServerUrl+'/api/events',
+        method: 'GET',
+        contentType: 'application/json',
+        data: {username: username},
+        success: function (response) {
+            console.log('Events found:', response);
+            // 서버로부터 응답을 받은 후, 캘린더에 이벤트 추가
+            response.forEach(function (event) {
+                calendar.addEvent(event);
+            });
+        },
+        error: function (error) {
+            console.error('Error getting events', error);
+        }
+    });
+}
+
