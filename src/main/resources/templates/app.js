@@ -70,6 +70,13 @@ let calendar = new FullCalendar.Calendar(calendarEl, {
     eventRemove: function (obj) { // 이벤트가 삭제되면 발생하는 이벤트
         console.log(obj);
     },
+    eventClick: function (info) { // 이벤트를 클릭했을 때 발생하는 이벤트
+        // 클릭한 이벤트의 정보를 Modal에 표시
+        const event = info.event;
+        openEventModal(event);
+        // Modal에는 수정, 삭제 기능이 있음.
+
+    },
 
     select: function (arg) { // 캘린더에서 드래그로 이벤트를 생성할 수 있다.
         let title = prompt('Event Title:');
@@ -78,15 +85,23 @@ let calendar = new FullCalendar.Calendar(calendarEl, {
                 title: title,
                 start: arg.start,
                 end: arg.end,
-                allDay: arg.allDay
-
+                allDay: arg.allDay,
+                editable: true,
             };
 
+            let sendData = {
+                title: newEvent.title,
+                startTime: newEvent.start.toISOString(),
+                endTime: newEvent.end.toISOString(),
+                username: sessionStorage.getItem('username'),
+                allDay: newEvent.allDay,
+            }
+
             $.ajax({
-                url: hostNameServerUrl+'/api/createEvent',
+                url: hostNameServerUrl+'/api/event/save/'+sessionStorage.getItem('id'),
                 method: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify(newEvent),
+                data: JSON.stringify(sendData),
                 success: function (response) {
                     console.log('Event created successfully:', response);
                     // 서버로부터 응답을 받은 후, 캘린더에 이벤트 추가
@@ -115,7 +130,6 @@ let calendar = new FullCalendar.Calendar(calendarEl, {
 });
 // 캘린더 랜더링
 calendar.render();
-
 
 
 
@@ -179,6 +193,7 @@ window.deleteMember = function () {
             // 로그인 성공 시 캘린더 표시 및 환영 메시지 표시
             sessionStorage.setItem('isLogin', 'false');
             sessionStorage.removeItem('username');
+            sessionStorage.removeItem('id');
             window.location.reload();
         },
         error: function (error) {
@@ -198,26 +213,57 @@ function showLoadingModal() {
 
 // 로딩 중인 경우 모달 숨기기
 function hideLoadingModal() {
-    $('#loadingModal').removeClass('active');
+    $('#loadingModal').modal('hide');
 }
 
-// 서버로부터 username에 해당하는 이벤트를 가져와서 캘린더에 추가
+// 서버로부터 memberId에 해당하는 이벤트를 가져와서 캘린더에 추가
 function loadUserEvents(username) {
     $.ajax({
-        url: hostNameServerUrl+'/api/events',
+        url: hostNameServerUrl+'/api/event/get/'+sessionStorage.getItem('id'),
         method: 'GET',
         contentType: 'application/json',
-        data: {username: username},
         success: function (response) {
-            console.log('Events found:', response);
-            // 서버로부터 응답을 받은 후, 캘린더에 이벤트 추가
-            response.forEach(function (event) {
-                calendar.addEvent(event);
-            });
+            if(response.length===0) {
+                alert('일정이 없습니다.');
+            } else {
+                console.log('Events found:', response);
+                // 서버로부터 응답을 받은 후, 캘린더에 이벤트 추가
+                response.forEach(function (event) {
+                    let data = {
+                        title: event.title,
+                        start: event.startTime,
+                        end: event.endTime,
+                        allDay: event.allDay,
+                        editable: true,
+                    }
+                    calendar.addEvent(data);
+                });
+
+            }
         },
         error: function (error) {
             console.error('Error getting events', error);
         }
     });
 }
+
+function openEventModal(event) {
+    $('#eventModal').modal({
+        backdrop: 'static',
+        keyboard: false
+    });
+
+    document.getElementById('eventTitle').innerText = event.title;
+    document.getElementById('eventStart').innerText = event.start.toLocaleString();
+    document.getElementById('eventEnd').innerText = event.end ? event.end.toLocaleString() : '';
+    document.getElementById('eventAllDay').innerText = event.allDay ? '⭕️' : '❌';
+}
+
+// 이벤트 추가
+
+
+// 이벤트 수정
+
+// 이벤트 삭제
+
 

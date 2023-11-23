@@ -1,6 +1,6 @@
 package com.example.calenderproject.Controller;
 
-import com.example.calenderproject.Dto.MemberDto;
+import com.example.calenderproject.Dto.MemberDTO;
 import com.example.calenderproject.Entity.MemberEntity;
 import com.example.calenderproject.Service.MemberService;
 import jakarta.transaction.Transactional;
@@ -21,7 +21,7 @@ public class MemberApiController {
 
     //로그인 구현
     @PostMapping("/login")
-    public ResponseEntity<?> loginMember(@RequestBody MemberDto memberDto) {
+    public ResponseEntity<?> loginMember(@RequestBody MemberDTO memberDto) {
         try{
             MemberEntity memberEntity= memberService.loginMember(memberDto);
             return new ResponseEntity<>(memberEntity,HttpStatus.OK);
@@ -34,7 +34,7 @@ public class MemberApiController {
     //회원 탈퇴 구현
     @DeleteMapping("/delete")
     @Transactional
-    public ResponseEntity<?> deleteMember(@RequestBody MemberDto memberDto) {
+    public ResponseEntity<?> deleteMember(@RequestBody MemberDTO memberDto) {
         log.info("deleteMember : " + memberDto.getUsername());
         try{
             memberService.deleteMember(memberDto);

@@ -1,11 +1,14 @@
 package com.example.calenderproject.Controller;
 
+import com.example.calenderproject.Dto.EventDTO;
+import com.example.calenderproject.Entity.EventEntity;
 import com.example.calenderproject.Service.EventService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/event")
@@ -13,11 +16,46 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @CrossOrigin(origins = "*")
 public class EventApiController {
-//    private final EventService eventService;
-
-    //이벤트 DB에서 가져오기
+    private final EventService eventService;
 
     //이벤트 DB에 저장하기
+    @PostMapping("/save/{memberId}")
+    public ResponseEntity<?> saveEvent(@RequestBody EventDTO eventDto, @PathVariable("memberId") Long memberId){
+        try {
+            EventEntity eventEntity = eventService.saveEvent(eventDto,memberId);
+            return eventEntity != null
+                    ? ResponseEntity.ok().body(eventEntity)
+                    : ResponseEntity.notFound().build();
+        } catch (Exception error) {
+            log.info("save error : " + error.getMessage());
+            return null;
+        }
+    }
+
+    //이벤트 DB에서 가져오기
+    @GetMapping("/get/{memberId}")
+    public ResponseEntity<?> getEvent(@PathVariable("memberId") Long memberId) {
+        try{
+            List<EventEntity> eventEntities = (List<EventEntity>) eventService.getEvent(memberId);
+            return eventEntities != null
+                    ? ResponseEntity.ok().body(eventEntities)
+                    : ResponseEntity.notFound().build();
+        } catch (Exception error) {
+            log.info("get error : " + error.getMessage());
+            throw new RuntimeException("get error : " + error.getMessage());
+        }
+    }
+
+    //이벤트 DB에서 수정하기
+    @PutMapping("/update")
+    public ResponseEntity<?> updateEvent() {
+        return null;
+    }
+
 
     //이벤트 DB에서 삭제하기
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteEvent() {
+        return null;
+    }
 }

@@ -1,6 +1,6 @@
 package com.example.calenderproject.Service;
 
-import com.example.calenderproject.Dto.MemberDto;
+import com.example.calenderproject.Dto.MemberDTO;
 import com.example.calenderproject.Entity.MemberEntity;
 import com.example.calenderproject.Repository.MemberRepository;
 import lombok.AllArgsConstructor;
@@ -25,7 +25,7 @@ public class MemberService {
 
 
     //로그인 구현
-    public MemberEntity loginMember(MemberDto memberDto) throws Exception {
+    public MemberEntity loginMember(MemberDTO memberDto) throws Exception {
         if (memberRepository.existsByUsername(memberDto.getUsername())) {
             try {
                 checkPassword(memberDto);
@@ -40,7 +40,7 @@ public class MemberService {
     }
 
     //회원 탈퇴 구현
-    public MemberEntity deleteMember(MemberDto memberDto) throws Exception {
+    public MemberEntity deleteMember(MemberDTO memberDto) throws Exception {
         //비밀번호 확인
         if(checkPassword(memberDto)) {
             memberRepository.deleteById(memberDto.getId());
@@ -54,7 +54,7 @@ public class MemberService {
     }
 
     //DB내 비밀번호 맞는지 조회
-    private Boolean checkPassword(MemberDto memberDto) throws Exception {
+    private Boolean checkPassword(MemberDTO memberDto) throws Exception {
         String username = memberDto.getUsername();
         String password = memberDto.getPassword();
 
@@ -64,14 +64,14 @@ public class MemberService {
             return true;
         }
         else {
-            log.info("password 오류 : " + member.getPassword() + " " + encodePassword(password) + " " + password);
+            log.info("password 오류 : " + encodePassword(password) + " " + password);
             throw new Exception("아이디 혹은 비밀번호를 확인하세요");
         }
     }
 
 
     //가천대학교 로그인 API
-    private MemberEntity gachonLogin(MemberDto memberDto) throws Exception{
+    private MemberEntity gachonLogin(MemberDTO memberDto) throws Exception{
         String username = memberDto.getUsername();
         String password = memberDto.getPassword();
 
@@ -104,7 +104,7 @@ public class MemberService {
             return memberRepository.findByUsername(username);
         }
         else {
-            log.info("password 오류 : " + data.getString("ErrorCode") + " " + encodePassword(password) + " " + password);
+            log.info("password 오류 : " + data.getString("ErrorCode") + " " + encodePassword(password));
             throw new Exception("아이디 혹은 비밀번호를 확인하세요");
         }
 

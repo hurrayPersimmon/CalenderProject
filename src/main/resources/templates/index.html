@@ -125,6 +125,28 @@
     </div>
 </div>
 
+<!-- 이벤트의 수정, 삭제, 정보를 담은 모달 -->
+<div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eventModalLabel">이벤트 정보</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Title:</strong> <span id="eventTitle"></span></p>
+                <p><strong>Start:</strong> <span id="eventStart"></span></p>
+                <p><strong>End:</strong> <span id="eventEnd"></span></p>
+                <p><strong>All Day:</strong> <span id="eventAllDay"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="editEvent()">수정</button>
+                <button type="button" class="btn btn-danger" onclick="deleteEvent()">삭제</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- calendar 태그 -->
 <div id='calendar-container'>
     <div id='calendar'></div>
