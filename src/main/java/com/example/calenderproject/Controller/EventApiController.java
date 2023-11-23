@@ -47,14 +47,22 @@ public class EventApiController {
     }
 
     //이벤트 DB에서 수정하기
-    @PutMapping("/update")
-    public ResponseEntity<?> updateEvent() {
-        return null;
+    @PatchMapping("/update/{eventId}")
+    public ResponseEntity<?> updateEvent(@PathVariable("eventId") Long eventId, @RequestBody EventDTO eventDto) {
+        try{
+            EventEntity eventEntity = eventService.updateEvent(eventId,eventDto);
+            return eventEntity != null
+                    ? ResponseEntity.ok().body(eventEntity)
+                    : ResponseEntity.notFound().build();
+        } catch (Exception error) {
+            log.info("update error : " + error.getMessage());
+            throw new RuntimeException("update error : " + error.getMessage());
+        }
     }
 
 
     //이벤트 DB에서 삭제하기
-    @DeleteMapping("/delete")
+    @DeleteMapping("/delete/{eventId}")
     public ResponseEntity<?> deleteEvent() {
         return null;
     }

@@ -7,7 +7,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -19,7 +18,7 @@ public class EventEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long eventId;
 
     private String username;
     private String title;
@@ -36,12 +35,13 @@ public class EventEntity implements Serializable {
     private boolean allDay;
 
 
-    public EventEntity(Long id, String title, String username, LocalDateTime startTime, LocalDateTime endTime, boolean allDay){
-        this.id = id;
+    public EventEntity(Long eventId, String title, String username, LocalDateTime startTime, LocalDateTime endTime, boolean allDay){
+        this.eventId = eventId;
         this.title = title;
         this.username = username;
         this.startTime = startTime;
         this.endTime = endTime;
         this.allDay = allDay;
     }
+
 }

@@ -64,8 +64,33 @@ let calendar = new FullCalendar.Calendar(calendarEl, {
     eventAdd: function (obj) { // 이벤트가 추가되면 발생하는 이벤트
         console.log(obj);
     },
-    eventChange: function (obj) { // 이벤트가 수정되면 발생하는 이벤트
-        console.log(obj);
+    eventChange: function (info) { // 이벤트가 수정되면 발생하는 이벤트
+        const event = info.event;
+        console.log(event.id);
+
+        let sendData = {
+            title: event.title,
+            startTime: event.start.toISOString(),
+            endTime: event.end.toISOString(),
+            username: sessionStorage.getItem('username'),
+            allDay: event.allDay,
+        }
+
+        $.ajax({
+            url: hostNameServerUrl+'/api/event/update/'+ event.id,
+            method: 'PATCH',
+            contentType: 'application/json',
+            data: JSON.stringify(sendData),
+            success: function (response) {
+                console.log('Event updating successfully:', response);
+                // 서버로부터 응답을 받은 후, 수정 사항 변경
+                calendar.updateEvent(event);
+
+            },
+            error: function (error) {
+                console.error('Error updating event:', error);
+            }
+        });
     },
     eventRemove: function (obj) { // 이벤트가 삭제되면 발생하는 이벤트
         console.log(obj);
@@ -105,7 +130,8 @@ let calendar = new FullCalendar.Calendar(calendarEl, {
                 success: function (response) {
                     console.log('Event created successfully:', response);
                     // 서버로부터 응답을 받은 후, 캘린더에 이벤트 추가
-                    calendar.addEvent(newEvent);
+                    const addedEvent = calendar.addEvent(newEvent);
+                    addedEvent.setProp('id', response.id);
                 },
                 error: function (error) {
                     console.error('Error creating event:', error);
@@ -248,15 +274,25 @@ function loadUserEvents(username) {
 }
 
 function openEventModal(event) {
+    console.log(event.extendedProps);
+    console.log(event._instance.instanceId);
+    console.log(event.endTime);
+    if(event.endTime === undefined){
+        $('#eventDeleteButton').hide();
+        $('#eventUpdateButton').hide();
+    }
+
     $('#eventModal').modal({
         backdrop: 'static',
         keyboard: false
     });
 
+
     document.getElementById('eventTitle').innerText = event.title;
     document.getElementById('eventStart').innerText = event.start.toLocaleString();
     document.getElementById('eventEnd').innerText = event.end ? event.end.toLocaleString() : '';
     document.getElementById('eventAllDay').innerText = event.allDay ? '⭕️' : '❌';
+
 }
 
 // 이벤트 추가
