@@ -28,7 +28,7 @@ public class EventEntity implements Serializable {
     private LocalDateTime endTime;
 
     @JsonIgnore
-    @ManyToOne(targetEntity = MemberEntity.class, fetch = FetchType.EAGER , cascade = CascadeType.REMOVE)
+    @ManyToOne(targetEntity = MemberEntity.class, fetch = FetchType.EAGER , cascade = CascadeType.ALL)
     @JoinColumn(name="member_id")
     private MemberEntity memberEntity;
 
